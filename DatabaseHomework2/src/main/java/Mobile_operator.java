@@ -56,13 +56,10 @@ public class Mobile_operator {
             e.printStackTrace();
         }
     }
-
-    /**
-     * 2
-     * 建表
-     */
+/*
+    建表
+ */
     private void createTable() {
-
         String createUser="create table user (user_id   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,\n"+
                 "phoneNumber char(20),\n"+
                 "used_local_phone_time DOUBLE,\n"+    //本地电话时常使用量 （单位：分钟）
@@ -121,17 +118,12 @@ public class Mobile_operator {
                 "user_id INT,\n"+    //联网人
                 "cost DOUBLE,\n"+      //费用
                 "isLocal INT,\n"+    //是否本地
-                "flow INT\n"+            // 使用流量数量（单位：兆）
+                "flow DOUBLE\n"+            // 使用流量数量（单位：兆）
                 ")DEFAULT CHARSET = utf8;";
-
-
         String[] statements = {createUser,createPackage, createOrder,createUnsubscribe,createPhone,createWeb};
         util.executeSQLs(statements, con);
     }
-  /*  private void test(){
-        String statement = "select * from user;";
-       util.executeSQL(statement, con);
-    }*/
+
     /*
     1.用户套餐查询
      */
@@ -275,7 +267,7 @@ public class Mobile_operator {
    4..用户话费生成
     */
      private void call_cost(double time, int from_id,int to_id,int islocal,Timestamp date){
-         String statement ="select used_local_phone_time,used_roam_phone_time,basic_local_phone_time,basic_roam_phone_time,local_phone_cost,roam_phone_cost from user where user_id="+from_id +"and take_effect=1;";
+         String statement ="select used_local_phone_time,used_roam_phone_time,basic_local_phone_time,basic_roam_phone_time,local_phone_cost,roam_phone_cost from user where user_id="+from_id +";";
          ResultSet re=util.executeSQL(statement, con);
        if(islocal==1){
            //此电话为本地电话
@@ -347,71 +339,111 @@ public class Mobile_operator {
                statement="update user set balance="+re_balance+" where user_id="+from_id+";";
                util.executeSQL(statement, con);
            }
-
-
        }
      }
-
-
-
-    /**
-     * 3
-     * 插入数据
+    /*
+    5.用户网费生成
      */
-  /*  private void insertData() {
-        Map<String, String> dormitoryPhoneMap = new HashMap<>();
-        List<String[]> dormitoryPhoneList = util.readFile("src/main/resources/电话.txt");
-        dormitoryPhoneList.remove(0);
-        for (String[] dormitoryPhone : dormitoryPhoneList) {
-            for (String s : dormitoryPhone) {
-                dormitoryPhoneMap.put(s.split(";")[0], s.split(";")[1]);
+    private void web_cost(Timestamp date,int u_id,double megabyte,int islocal){
+        String statement ="select used_local_web_flow,used_roam_web_flow,basic_local_web_flow,basic_roam_web_flow,local_web_cost,roam_web_cost   from user where user_id="+u_id +";";
+        ResultSet re=util.executeSQL(statement, con);
+        if(islocal==1){
+            //本地上网
+            double used_local_web_flow=0;
+            double basic_local_web_flow =0;
+            double local_web_cost=0;
+            try {
+                used_local_web_flow=re.getDouble(1);
+                basic_local_web_flow=re.getDouble(3);
+                local_web_cost=re.getDouble(5);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if(used_local_web_flow+megabyte<=basic_local_web_flow){
+                //未超过额定免费流量
+                //增加上网记录
+                statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+0+","+islocal+","+megabyte+" );";
+                util.executeSQL(statement, con);
+
+            }else{
+                //超过免费时长   1.账户扣款  2.增加上网记录
+                double cost_time=Math.min(used_local_web_flow+megabyte-basic_local_web_flow,megabyte);
+                statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+cost_time*local_web_cost+","+islocal+","+megabyte+" );";
+                util.executeSQL(statement, con);
+                statement="select balance from user where user_id="+u_id+";";
+                re=util.executeSQL(statement, con);
+                double balance=0;
+                try {
+                    balance=re.getDouble(1);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                double re_balance=balance-cost_time*local_web_cost;
+                statement="update user set balance="+re_balance+" where user_id="+u_id+";";
+                util.executeSQL(statement, con);
+            }
+        }else{
+            //异地上网
+            double used_roam_web_flow=0;
+            double basic_roam_web_flow=0;
+            double roam_web_cost=0;
+            try {
+                used_roam_web_flow=re.getDouble(1);
+                basic_roam_web_flow=re.getDouble(3);
+                roam_web_cost=re.getDouble(5);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            if(used_roam_web_flow+megabyte<=basic_roam_web_flow){
+                //未超过额定免费流量
+                //增加上网记录
+                statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+0+","+islocal+","+megabyte+" );";
+                util.executeSQL(statement, con);
+
+            }else{
+                //超过免费时长   1.账户扣款  2.增加上网记录
+                double cost_time=Math.min(used_roam_web_flow+megabyte-basic_roam_web_flow,megabyte);
+                statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+cost_time*roam_web_cost+","+islocal+","+megabyte+" );";
+                util.executeSQL(statement, con);
+                statement="select balance from user where user_id="+u_id+";";
+                re=util.executeSQL(statement, con);
+                double balance=0;
+                try {
+                    balance=re.getDouble(1);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                double re_balance=balance-cost_time*roam_web_cost;
+                statement="update user set balance="+re_balance+" where user_id="+u_id+";";
+                util.executeSQL(statement, con);
             }
         }
-
-        List<String> studentList = util.readExcelFile("src/main/resources/分配方案.xls");
-        studentList.remove(0); // 去掉标题行
-
-        // 插入department
-        Set<String> departmentNameSet = new HashSet<>();
-        for (String s : studentList) {
-            departmentNameSet.add(s.split(",")[0]);
-        }
-
-        Map<String, Integer> departmentIdMap = new HashMap<>();
-        Integer departmentCount = 1;
-
-        for (String department : departmentNameSet) {
-            util.executeSQL("INSERT INTO department (dept_name) VALUES ('" + department + "');", con);
-            departmentIdMap.put(department, departmentCount++);
-        }
-
-        // 插入building
-        Map<String, String[]> buildingMaps = new HashMap<>();
-        for (String s : studentList) {
-            //build_name, build_campus, build_price
-            buildingMaps.put(s.split(",")[5], new String[]{s.split(",")[4], s.split(",")[6].split(";")[0]});
-        }
-
-        Map<String, Integer> buildingIdMap = new HashMap<>();
-        Integer buildingCount = 1;
-
-        for (String key : buildingMaps.keySet()) {
-            String campus = buildingMaps.get(key)[0];
-            String price = buildingMaps.get(key)[1];
-            util.executeSQL("INSERT INTO building (build_name, build_campus, build_price, build_phone) VALUES"
-                    + " ('" + key + "', '" + campus + "', " + price + ", '" + dormitoryPhoneMap.get(key) + "');", con);
-
-            buildingIdMap.put(key, buildingCount++);
-        }
-
-        // 插入student
-        for (String s : studentList) {
-            util.executeSQL("INSERT into student (stu_id, stu_name, stu_gender, stu_dept_id, stu_build_id) VALUES"
-                    + " ('" + s.split(",")[1] + "', '" + s.split(",")[2] + "', '" + s.split(",")[3] + "', '"
-                    + departmentIdMap.get(s.split(",")[0]) + "', '" + buildingIdMap.get(s.split(",")[5]) + "');", con);
+    }
+    /*
+    6.账单生成
+     */
+    private void getBill(int u_id,String date){
+        //此处的date 为所需查询的年月  结构为  xxxx-xx  例：2018-10
+        String statement="select * from  phone where from_user_id="+u_id+"  and date_format(date,'%Y-%m')="+date+";";
+        ResultSet re=util.executeSQL(statement, con);
+        while(re!=null){
+            try {
+                System.out.println("id:"+re.getInt(1)+"  拨打时间："+re.getTimestamp(2)+" 拨打人:"+re.getInt(3)+" 接收人:"+re.getInt(4)+" 费用："+re.getDouble(5));
+            }catch (Exception e){
+                System.out.println(e);
+            }
 
         }
-    }*/
+        statement ="select * from  web  where user_id="+u_id+"  and date_format(date,'%Y-%m')="+date+";";
+        re=util.executeSQL(statement, con);
+        while(re!=null){
+            try {
+                System.out.println("id:"+re.getInt(1)+"  开始联网时间："+re.getTimestamp(2)+" 联网人:"+re.getInt(3)+" 费用："+re.getDouble(4)+" 使用流量："+re.getDouble(6)+"兆");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }
+    }
 
 
 }
