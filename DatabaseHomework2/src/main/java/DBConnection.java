@@ -1,5 +1,9 @@
 import java.sql.DriverManager;
-
+/**
+ * @创建人 徐介晖
+ * @创建时间 2018/10/23
+ * @描述
+ */
 public class DBConnection {
     private static final String driverName = "com.mysql.cj.jdbc.Driver";
     private static final String userName = "root";

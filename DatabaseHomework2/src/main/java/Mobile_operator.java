@@ -3,45 +3,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-
+/**
+ * @创建人 徐介晖
+ * @创建时间 2018/10/23
+ * @描述
+ */
 public class Mobile_operator {
     private Connection con;
     private Util util;
 
     public static void main(String[] args) {
         Mobile_operator operator = new Mobile_operator();
-        long startTime, endTime;
-
-        /*System.out.println("#2 建表");
-        startTime = System.currentTimeMillis();
+       /* System.out.println("#2 建表");
+        //startTime = System.currentTimeMillis();
         operator.createTable();*/
-      //  operator.test();
-      /*  endTime = System.currentTimeMillis();
-        System.out.println("Time: " + (endTime - startTime) + " ms");
+      /* operator.AddPackage(20,100,0,0,0,0,0.5,2,0.5,5,0.1);  //语音套餐
+       operator.AddPackage(10,0,0,0,0,200,0.5,2,0.5,5,0.1);  //短信套餐
+        operator.AddPackage(20,0,2000,0,0,200,0.5,2,0.5,3,0.1);  //本地流量套餐
+        operator.AddPackage(30,0,0,0,2000,200,0.5,2,0.5,3,0.1);  //全过流量套餐*/
+        operator.AddUser("18251835786",0,0,0,0,0,0,0,0,0,0,0.5,2,0.5,5,0.1,100);
 
-        System.out.println("#3 插入数据");
-        startTime = System.currentTimeMillis();
-        dormitory.insertData();
-        endTime = System.currentTimeMillis();
-        System.out.println("Time: " + (endTime - startTime) + " ms");
-
-        System.out.println("#4 查询“王小星”同学所在宿舍楼的所有院系");
-        startTime = System.currentTimeMillis();
-        dormitory.searchWangXiaoxing();
-        endTime = System.currentTimeMillis();
-        System.out.println("Time: " + (endTime - startTime) + " ms");
-
-        System.out.println("#5 陶园一舍的住宿费用提高至 1200 元");
-        startTime = System.currentTimeMillis();
-        dormitory.updatePrice();
-        endTime = System.currentTimeMillis();
-        System.out.println("Time: " + (endTime - startTime) + " ms");
-
-        System.out.println("#6 软件学院男女研究生互换宿舍楼");
-        startTime = System.currentTimeMillis();
-        dormitory.exchangeBuilding();
-        endTime = System.currentTimeMillis();
-        System.out.println("Time: " + (endTime - startTime) + " ms");*/
     }
 
     public Mobile_operator() {
@@ -123,7 +104,52 @@ public class Mobile_operator {
         String[] statements = {createUser,createPackage, createOrder,createUnsubscribe,createPhone,createWeb};
         util.executeSQLs(statements, con);
     }
+/*
+添加数据
+ */
+    private void AddPackage(double bc,double blpt,double blwf,double  brpt,double brwf,int bm ,double lpc,double lwc,double rpc,double rwc,double mc ){
+        String package1="insert into package values(0,"+bc+","+blpt+","+blwf+","+brpt+","+brwf+","+bm+","+lpc+","+lwc+","+rpc+","+rwc+","+mc+" );";
+     /*         "basic_cost DOUBLE,\n"+   //每月基本费用
+                "basic_local_phone_time DOUBLE,\n"+    //基本本地免费电话时常 （单位：分钟）
+                "basic_local_web_flow DOUBLE,\n"+    //基本本地免费流量数量（单位：兆）
+                "basic_roam_phone_time DOUBLE,\n"+    //基本漫游免费电话时常 （单位：分钟）
+                "basic_roam_web_flow DOUBLE,\n"+    //基本漫游免费流量数量（单位：兆）
+                "basic_message INT,\n"+    //基本免费短信数量（单位：个）
+                "local_phone_cost  DOUBLE,\n"+  //本地电话每分钟费用
+                "local_web_cost  DOUBLE,\n"+//本地流量每兆费用
+                "roam_phone_cost  DOUBLE,\n"+  //漫游电话每分钟费用
+                "roam_web_cost  DOUBLE,\n"+//本地流量每兆费用
+                "message_cost  DOUBLE\n"+//短信费用*/
 
+        util.executeSQLNoResult(package1,con);
+    }
+
+ private void AddUser(String p,double ulpt,double ulwf,double urpt,double urwf,int um,double blpt,double blwf,double brpt,double brwf,int bm,double lpc,double lwc,double rpc,double rwc,double mc,double b){
+        String statement="insert into user values(0,"+p+","+ulpt+","+ulwf+","+urpt+","+urwf+","+um+","+blpt+","+blwf+","+brpt+","+brwf+","+bm+","+lpc+","+lwc+","+rpc+","+rwc+","+mc+","+b+");";
+        util.executeSQLNoResult(statement,con);
+        /*
+          (user_id   INT PRIMARY KEY NOT NULL AUTO_INCREMENT,\n"+
+                "phoneNumber char(20),\n"+
+                "used_local_phone_time DOUBLE,\n"+    //本地电话时常使用量 （单位：分钟）
+                "used_local_web_flow DOUBLE,\n"+    //本地流量使用数量（单位：兆）
+                "used_roam_phone_time DOUBLE,\n"+    //漫游电话时常使用量 （单位：分钟）
+                "used_roam_web_flow DOUBLE,\n"+    //漫游流量使用数量（单位：兆）
+                "used_message  INT,\n"+//短信数量
+                "basic_local_phone_time DOUBLE,\n"+    //基本本地免费电话时常 （单位：分钟）
+                "basic_local_web_flow DOUBLE,\n"+    //基本本地免费流量数量（单位：兆）
+                "basic_roam_phone_time DOUBLE,\n"+    //基本漫游免费电话时常 （单位：分钟）
+                "basic_roam_web_flow DOUBLE,\n"+    //基本漫游免费流量数量（单位：兆）
+                "basic_message INT,\n"+    //基本免费短信数量（单位：个）
+                "local_phone_cost  DOUBLE,\n"+  //本地电话每分钟费用
+                "local_web_cost  DOUBLE,\n"+//本地流量每兆费用
+                "roam_phone_cost  DOUBLE,\n"+  //漫游电话每分钟费用
+                "roam_web_cost  DOUBLE,\n"+//本地流量每兆费用
+                "message_cost  DOUBLE,\n"+//短信费用
+                "balance DOUBLE\n"+    //账户余额
+
+
+         */
+ }
     /*
     1.用户套餐查询
      */
@@ -161,12 +187,13 @@ public class Mobile_operator {
             //账户付费
              String result_money=balance-cost+"";
              statement="update user set balance="+result_money+" where user.phoneNumber=phone ;";
+             util.executeSQLNoResult(statement,con);
              //增加订购记录
              statement="insert into orders (time,take_effect,user_id,package_id) values(NOW(),1,"+id+","+p_id+",);";
-             util.executeSQL(statement, con);
+             util.executeSQLNoResult(statement, con);
              //增加历史记录
              statement="insert into unsubscribe(start_time,user_id,package_id) values(NOW(),"+id+","+p_id+");";
-             util.executeSQL(statement, con);
+             util.executeSQLNoResult(statement, con);
              //更新用户本月免费话费、流量、短信情况和价格
              statement ="select basic_local_phone_time,basic_local_web_flow,basic_roam_phone_time,basic_roam_web_flow,basic_message,local_web_cost,local_phone_cost,roam_phone_cost,roam_web_cost,message_cost  from user where phoneNumber=phone;";
              re= util.executeSQL(statement, con);
@@ -238,10 +265,10 @@ public class Mobile_operator {
              }
              //增加订购记录
              statement="insert into orders (time,take_effect,user_id,package_id) values(NOW(),0,"+id+","+p_id+",);";
-             util.executeSQL(statement, con);
+             util.executeSQLNoResult(statement, con);
              //增加历史记录
              statement="insert into unsubscribe(start_time,user_id,package_id) values(NOW(),"+id+","+p_id+");";
-             util.executeSQL(statement, con);
+             util.executeSQLNoResult(statement, con);
              //注意：实际运行过程中，在每月初自动扣除这月套餐的费用,且将update orders表置值1
          }
      }
@@ -258,9 +285,9 @@ public class Mobile_operator {
              e.printStackTrace();
          }
           statement ="delete from orders where user_id = "+id +" and  "+p_id+" =package_id;";
-          re= util.executeSQL(statement, con);
+          util.executeSQLNoResult(statement, con);
           statement="update unsubscribe set end_time =NOW() where package_id="+p_id+" and end_time=NULL;";
-         re= util.executeSQL(statement, con);
+          util.executeSQLNoResult(statement, con);
      }
 
      /*
@@ -285,12 +312,12 @@ public class Mobile_operator {
                //未超过额定免费时长
                //增加通话记录
                statement="insert into phone(date,from_user,to_user,cost,isLocal,time) values("+date+","+from_id+","+to_id+","+0+","+islocal+","+time+" );";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
            }else{
                //超过免费时长   1.账户扣款  2.增加通话记录
                double cost_time=Math.min(used_local_phone_time+time-basic_local_phone_time,time);
                statement="insert into phone(date,from_user,to_user,cost,isLocal,time) values("+date+","+from_id+","+to_id+","+cost_time*local_phone_cost+","+islocal+","+time+" );";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
                statement="select balance from user where user_id="+from_id+";";
                re=util.executeSQL(statement, con);
                double balance=0;
@@ -301,7 +328,7 @@ public class Mobile_operator {
                }
                double re_balance=balance-cost_time*local_phone_cost;
                statement="update user set balance="+re_balance+" where user_id="+from_id+";";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
            }
 
        }else{
@@ -320,13 +347,13 @@ public class Mobile_operator {
                //未超过额定免费时长
                //增加通话记录
                statement="insert into phone(date,from_user,to_user,cost,isLocal,time) values("+date+","+from_id+","+to_id+","+0+","+islocal+","+time+" );";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
 
            }else{
                //超过免费时长   1.账户扣款  2.增加通话记录
                double cost_time=Math.min(used_roam_phone_time+time-basic_roam_phone_time,time);
                statement="insert into phone(date,from_user,to_user,cost,isLocal,time) values("+date+","+from_id+","+to_id+","+cost_time*roam_phone_cost+","+islocal+","+time+" );";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
                statement="select balance from user where user_id="+from_id+";";
                re=util.executeSQL(statement, con);
                double balance=0;
@@ -337,7 +364,7 @@ public class Mobile_operator {
                }
                double re_balance=balance-cost_time*roam_phone_cost;
                statement="update user set balance="+re_balance+" where user_id="+from_id+";";
-               util.executeSQL(statement, con);
+               util.executeSQLNoResult(statement, con);
            }
        }
      }
@@ -363,13 +390,13 @@ public class Mobile_operator {
                 //未超过额定免费流量
                 //增加上网记录
                 statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+0+","+islocal+","+megabyte+" );";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
 
             }else{
                 //超过免费时长   1.账户扣款  2.增加上网记录
                 double cost_time=Math.min(used_local_web_flow+megabyte-basic_local_web_flow,megabyte);
                 statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+cost_time*local_web_cost+","+islocal+","+megabyte+" );";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
                 statement="select balance from user where user_id="+u_id+";";
                 re=util.executeSQL(statement, con);
                 double balance=0;
@@ -380,7 +407,7 @@ public class Mobile_operator {
                 }
                 double re_balance=balance-cost_time*local_web_cost;
                 statement="update user set balance="+re_balance+" where user_id="+u_id+";";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
             }
         }else{
             //异地上网
@@ -398,13 +425,13 @@ public class Mobile_operator {
                 //未超过额定免费流量
                 //增加上网记录
                 statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+0+","+islocal+","+megabyte+" );";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
 
             }else{
                 //超过免费时长   1.账户扣款  2.增加上网记录
                 double cost_time=Math.min(used_roam_web_flow+megabyte-basic_roam_web_flow,megabyte);
                 statement="insert into web(date,user_id,cost,isLocal,flow) values("+date+","+u_id+","+cost_time*roam_web_cost+","+islocal+","+megabyte+" );";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
                 statement="select balance from user where user_id="+u_id+";";
                 re=util.executeSQL(statement, con);
                 double balance=0;
@@ -415,7 +442,7 @@ public class Mobile_operator {
                 }
                 double re_balance=balance-cost_time*roam_web_cost;
                 statement="update user set balance="+re_balance+" where user_id="+u_id+";";
-                util.executeSQL(statement, con);
+                util.executeSQLNoResult(statement, con);
             }
         }
     }
