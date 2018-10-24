@@ -30,15 +30,16 @@ public class Util {
     }
     public ResultSet executeSQL(String s, Connection con) {
         try (Statement statement = con.createStatement()) {
-         // statement.execute(s);
-            System.out.println(s);
+
+           // System.out.println(s);
           ResultSet re=statement.executeQuery(s);
-          re.next();
+         // re.next();
+        //  System.out.println("tem:"+re.getDouble(1));
          /* while(re!=null){
               System.out.println(re.getString(2));
               re.next();
           }*/
-            con.commit();
+          //  con.commit();
             return  re;
         } catch (Exception e) {
             e.printStackTrace();
